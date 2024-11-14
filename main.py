@@ -22,7 +22,7 @@ def number_to_degrees(num):
 
 if __name__ == '__main__':
 
-    results = {}
+    results = FrequencyDict()
     window = []
     user_input = ''
 
@@ -32,13 +32,13 @@ if __name__ == '__main__':
             break
         converted = number_to_degrees(int(user_input))
 
-        if len(window) > 5:
-            if window in results:
-                results[window].append(converted, 1)
-            else:
-                results[window] = FrequencyDict([converted], [1])
+        if len(window) == 3:
+            s = SmartTuple(window.copy(), 20)
+            results.__add__(s, int(user_input))
             window.pop(0)
 
         window.append(converted)
-
-
+        print(window)
+        print(results)
+        s = SmartTuple(window, 20)
+        print(results.get_best_result(s))
