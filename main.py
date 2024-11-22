@@ -1,6 +1,8 @@
 from dataTypes import FrequencyDict
 from dataTypes import SmartTuple
 
+NUMBERS = 0
+REGIONS = 1
 
 def number_to_degrees(num):
     """
@@ -20,25 +22,84 @@ def number_to_degrees(num):
     return (nums.index(num) + 1) * 9.7 - 4.85
 
 
+def numbers_to_region(num):
+    zero = [12, 35, 3, 26, 0, 32, 15]
+    tier = [33, 16, 24, 5, 10, 23, 8, 30, 11, 36, 13, 27]
+    orphins = [9, 31, 14, 20, 1, 17, 34, 6]
+    other = [28, 7, 29, 18, 22, 19, 4, 21, 2, 25]
+    if num in zero:
+        return 0
+    if num in tier:
+        return 1
+    if num in orphins:
+        return 2
+    if num in other:
+        return 3
+
+
 if __name__ == '__main__':
 
-    results = FrequencyDict()
+    results = FrequencyDict(0.9)
     window = []
     user_input = ''
+    mode = REGIONS
 
     while user_input != 'q':
         user_input = input('Enter a number or q to quit: ')
         if user_input == 'q':
             break
-        converted = number_to_degrees(int(user_input))
+        converted = -1
+        if mode == NUMBERS:
+            converted = number_to_degrees(int(user_input))
+        elif mode == REGIONS:
+            converted = numbers_to_region(int(user_input))
 
-        if len(window) == 3:
-            s = SmartTuple(window.copy(), 20)
-            results.__add__(s, int(user_input))
-            window.pop(0)
+        s = ()
+        r = 4
+        window2 = []
+        if len(window) == 2:
+            window2 = [converted] + window[:2]
+            print(window2)
+            print()
+            if mode == NUMBERS:
 
-        window.append(converted)
+                #s = SmartTuple(window2, 20)
+                s2 = SmartTuple(window.copy(), 20)
+                #r = results.get_best_result(s)
+                results.__add__(s2, int(user_input))
+                window.insert(0, converted)
+                window.pop()
+                s = SmartTuple(window.copy(), 20)
+
+            elif mode == REGIONS:
+                #s = SmartTuple(window2, 0)
+                s2 = SmartTuple(window.copy(), 0)
+                #r = results.get_best_result(s)
+                results.__add__(s2, numbers_to_region(int(user_input)))
+                window.insert(0, converted)
+                window.pop()
+                s = SmartTuple(window.copy(), 0)
+
+            r = results.get_best_result(s)
+            #window.pop(0)
+
+            #window = window2
+        else:
+            window.insert(0, converted)
         print(window)
         print(results)
-        s = SmartTuple(window, 20)
-        print(results.get_best_result(s))
+
+        if mode == NUMBERS:
+            print(results.get_best_result(s))
+        if mode == REGIONS:
+
+            if r == 0:
+                print('zero')
+            elif r == 1:
+                print('tier')
+            elif r == 2:
+                print('orphins')
+            elif r == 3:
+                print('other')
+            else:
+                print("none")

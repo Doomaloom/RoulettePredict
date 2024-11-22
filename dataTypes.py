@@ -39,7 +39,11 @@ class SmartTuple:
             if distance >= 360 - self.tolerance:
                 distance = 360 - distance
             if distance <= self.tolerance:
-                score += (self.tolerance - distance) / self.tolerance
+                if self.tolerance > 0:
+                    score += (self.tolerance - distance) / self.tolerance
+                else:
+                    if self.items[i] == other.items[i]:
+                        score += 1
 
         return score / compared_len
 
@@ -75,14 +79,16 @@ class FrequencyDict:
 
     keys: list[SmartTuple]
     values: list[dict]
+    tolerance: float
 
-    def __init__(self):
+    def __init__(self, tolerance=0.3):
         self.keys = []
         self.values = []
+        self.tolerance = tolerance
 
     def __add__(self, run: SmartTuple, result: int):
         for i in range(len(self.keys)):
-            if (self.keys[i] == run) > 0.3:
+            if (self.keys[i] == run) >= self.tolerance:
                 if result in self.values[i]:
                     self.values[i][result] += 1
                 else:
@@ -95,7 +101,7 @@ class FrequencyDict:
         max_value = 0
         max_num = None
         for i in range(len(self.keys)):
-            if (self.keys[i] == run) > 0.3:
+            if (self.keys[i] == run) >= self.tolerance:
                 for j in self.values[i]:
                     if self.values[i][j] > max_value:
                         max_value = self.values[i][j]
