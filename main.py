@@ -71,6 +71,7 @@ def numbers_to_region(num):
 
 if __name__ == '__main__':
 
+    window_size = 10
     results = FrequencyDict(0.9)
     window = []
     window = [number_to_degrees(window[i]) for i in range(len(window))]
@@ -93,7 +94,7 @@ if __name__ == '__main__':
         r = 4
         answer = None
         window2 = []
-        if len(window) == 30:
+        if len(window) == window_size:
             window2 = [converted] + window[:2]
             print(window2)
             print()
