@@ -6,6 +6,8 @@ from sklearn.linear_model import SGDRegressor as sgdr
 import matplotlib.pyplot as plt
 
 from sklearn.linear_model import LinearRegression
+from statsmodels.miscmodels.ordinal_model import OrderedModel
+
 
 
 NUMBERS = 0
@@ -50,7 +52,7 @@ def degrees_to_number(num):
     elif num + 360 <= 360:
         num += 360
 
-    index = round((num + 4.85) / 9.7) - 1
+    index = round((num + 4.85) / 9.7) - 2
     return nums[index]
 
 
@@ -71,14 +73,17 @@ def numbers_to_region(num):
 
 if __name__ == '__main__':
 
-    window_size = 10
+    window_size = 20
     results = FrequencyDict(0.9)
+    window = [36, 8, 9, 20, 20, 26, 25, 0, 16, 2, 1, 11, 13, 4, 4, 28, 26,
+              31, 13, 23, 0, 12, 18, 27, 8, 14, 28, 10, 13, 1]
     window = []
+
     window = [number_to_degrees(window[i]) for i in range(len(window))]
     user_input = ''
     mode = DISTANCE
-    #model = sgdr(max_iter=1000, tol=1e-3)
-    model = LinearRegression()
+    model1 = LinearRegression()
+    model2 = LinearRegression()
 
     while user_input != 'q':
         user_input = input('Enter a number or q to quit: ')
@@ -95,77 +100,55 @@ if __name__ == '__main__':
         answer = None
         window2 = []
         if len(window) == window_size:
-            window2 = [converted] + window[:2]
-            print(window2)
-            print()
-            if mode == NUMBERS:
 
-                #s = SmartTuple(window2, 20)
-                s2 = SmartTuple(window.copy(), 20)
-                #r = results.get_best_result(s)
-                results.__add__(s2, int(user_input))
-                window.insert(0, converted)
-                window.pop()
-                s = SmartTuple(window.copy(), 20)
-
-            elif mode == REGIONS:
-                #s = SmartTuple(window2, 0)
-                s2 = SmartTuple(window.copy(), 0)
-                #r = results.get_best_result(s)
-                results.__add__(s2, numbers_to_region(int(user_input)))
-                window.insert(0, converted)
-                window.pop()
-                s = SmartTuple(window.copy(), 0)
-
-            elif mode == DISTANCE:
+            if mode == DISTANCE:
                 # TODO: NEED TO MAKE THIS BASED ON DISTANCE
                 # TODO: CURRENTLY USING JUST SPIN POSITION
                 # TODO: x should represent the number it was on
                 # TODO: y should show the degrees change from it previous number
-                x = np.array([window[i] for i in range(len(
-                    window) - 1)]).reshape(-1, 1)
-                y = np.array([window[i] - window[i + 1] for i in range(len(
-                    window) - 1)])
-                model.fit(x, y)
-                print(x, "\n", y)
+                x1 = np.array([window[i*2] for i in range(len(
+                    window) // 2 - 1)]).reshape(-1, 1)
+                y1 = np.array([window[i*2] - window[i*2 + 1] for i in range(len(
+                    window) // 2 - 1)])
+
+                x2 = np.array([window[i*2+1] for i in range(len(
+                    window) // 2 - 1)]).reshape(-1, 1)
+                y2 = np.array([window[i*2+1] - window[i*2 + 2] for i in range(
+                    len(window) // 2 - 1)])
+                model1.fit(x1, y1)
+                model2.fit(x2, y2)
+                #print(x, "\n", y)
                 last_spin = np.array([window[-1]]).reshape(-1, 1)
-                next_prediction = model.predict(x)
-                answer = converted + next_prediction[-1]
+                next_prediction1 = model1.predict(x1)
+                next_prediction2 = model2.predict(x2)
+                if len(window) % 2 != 0:
+                    confidence = model1.score(x1, y1)
+                    print(f"confidence: {confidence}")
+                    answer = [converted - next_prediction1[-1], converted +
+                              next_prediction1[-1]]
+                else:
+                    confidence = model2.score(x2, y2)
+                    print(f"confidence: {confidence}")
+                    answer = [converted - next_prediction2[-1], converted +
+                              next_prediction2[-1]]
                 window.insert(0, converted)
                 window.pop()
 
-                plt.scatter(x, y)
-                plt.plot(x, next_prediction)
+                plt.scatter(x1, y1)
+                plt.plot(x1, next_prediction1)
+                plt.show()
+                plt.scatter(x2, y2)
+                plt.plot(x2, next_prediction2)
                 plt.show()
 
-
-
-
-            r = results.get_best_result(s)
-            #window.pop(0)
-
-            #window = window2
         else:
             window.insert(0, converted)
-        print(window)
-        print(results)
+        #print(window)
+        #print(results)
 
-        if mode == NUMBERS:
-            print(results.get_best_result(s))
         if mode == DISTANCE:
             if answer:
-                print(answer)
-                print(degrees_to_number(answer))
+                print(f"degrees moved: {answer}")
 
-        if mode == REGIONS:
-
-            if r == 0:
-                print('zero')
-            elif r == 1:
-                print('tier')
-            elif r == 2:
-                print('orphins')
-            elif r == 3:
-                print('other')
-            else:
-                print("none")
+                print(f"predicted best bet: "
+                      f"{degrees_to_number(answer[0]), degrees_to_number(answer[1])}")
