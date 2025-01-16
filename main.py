@@ -14,6 +14,7 @@ NUMBERS = 0
 REGIONS = 1
 DISTANCE = 2
 
+
 def number_to_degrees(num):
     """
     Converts a number to degrees on a roulette wheel
