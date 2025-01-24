@@ -1,6 +1,5 @@
 from predictor import Predictor
 
-
 def number_to_degrees(num):
     """
     Converts a number to degrees on a roulette wheel
@@ -39,7 +38,7 @@ def degrees_to_number(num):
     elif num + 360 <= 360:
         num += 360
 
-    index = round((num + 4.85) / 9.7) - 1
+    index = round((num + 4.85) / 9.7) - 2
     return nums[index]
 
 
@@ -69,4 +68,4 @@ if __name__ == '__main__':
                 next_number = degrees_to_number(prediction[0])
                 print(f"{p}next number: {next_number}, confidence: "
                       f"{prediction[1]}")
-
+                p.graph()
