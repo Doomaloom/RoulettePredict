@@ -62,6 +62,7 @@ if __name__ == '__main__':
 
         for p in predictors:
             p.add_spin(converted)
+            #p.add_spin(int(user_input))
 
             if p.ready_to_predict():
                 prediction = p.predict()
